@@ -6,48 +6,58 @@ interface Props {
 }
 
 const RatingFeedback: React.FC<Props> = ({ messageId }) => {
-  const [rating, setRating] = useState<number>(0);
-  const [hovered, setHovered] = useState<number>(0);
+  const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
-  const [saved, setSaved] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleRate = (value: number) => {
+  const handleRating = (value: number) => {
     setRating(value);
-    localStorage.setItem(`rating-${messageId}`, value.toString());
   };
 
-  const handleFeedback = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
-    setFeedback(text);
-    localStorage.setItem(`feedback-${messageId}`, text);
-    setSaved(true);
+  const handleSubmit = () => {
+    if (!rating) return;
+    console.log("Feedback submitted:", { messageId, rating, feedback });
+    setSubmitted(true);
   };
+
+  if (submitted) {
+    return (
+      <p className="text-green-500 text-xs mt-2">Cảm ơn bạn đã phản hồi!</p>
+    );
+  }
 
   return (
-    <div className="mt-2 text-sm text-gray-600">
-      <div className="flex gap-1 items-center">
-        {[1, 2, 3, 4, 5].map((star) => (
+    <div className="mt-2 border-t border-gray-600 pt-2">
+      <div className="flex items-center gap-1 mb-2">
+        {[1, 2, 3, 4, 5].map((value) => (
           <Star
-            key={star}
+            key={value}
             size={18}
-            className={`cursor-pointer ${
-              star <= (hovered || rating) ? "text-yellow-400" : "text-gray-300"
+            onClick={() => handleRating(value)}
+            className={`cursor-pointer transition ${
+              value <= rating
+                ? "text-yellow-400"
+                : "text-gray-500"
             }`}
-            onMouseEnter={() => setHovered(star)}
-            onMouseLeave={() => setHovered(0)}
-            onClick={() => handleRate(star)}
           >
-            <title>{`Đánh giá ${star} sao`}</title>
+            <title>{`Đánh giá ${value} sao`}</title>
           </Star>
         ))}
       </div>
       <textarea
-        placeholder="Ý kiến của bạn..."
-        className="mt-1 w-full border rounded px-2 py-1 text-xs"
+        className="w-full text-sm bg-gray-800 text-white border border-gray-700 rounded p-2"
+        placeholder="Góp ý thêm..."
+        rows={2}
         value={feedback}
-        onChange={handleFeedback}
+        onChange={(e) => setFeedback(e.target.value)}
       />
-      {saved && <div className="text-green-500 text-xs mt-1">Đã lưu phản hồi</div>}
+      <button
+        onClick={handleSubmit}
+        className="mt-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
+        title="Gửi đánh giá"
+      >
+        Gửi đánh giá
+      </button>
     </div>
   );
 };
