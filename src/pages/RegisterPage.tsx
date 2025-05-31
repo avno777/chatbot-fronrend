@@ -7,7 +7,10 @@ import * as yup from "yup";
 
 const schema = yup.object({
   email: yup.string().email("Email không hợp lệ").required("Email bắt buộc"),
-  password: yup.string().min(6, "Tối thiểu 6 ký tự").required("Mật khẩu bắt buộc"),
+  password: yup
+    .string()
+    .min(6, "Tối thiểu 6 ký tự")
+    .required("Mật khẩu bắt buộc"),
 });
 
 const RegisterPage: React.FC = () => {
@@ -32,7 +35,7 @@ const RegisterPage: React.FC = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-white p-6 rounded shadow-md w-full max-w-sm space-y-4"
+        className="bg-gray-400 p-6 rounded shadow-md w-full max-w-sm space-y-4"
       >
         <h2 className="text-xl font-semibold text-center">Đăng ký</h2>
 

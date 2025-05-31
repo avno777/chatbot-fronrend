@@ -34,7 +34,7 @@ const LoginPage: React.FC = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-white p-6 rounded shadow-md w-full max-w-sm space-y-4"
+        className="bg-gray-400 p-6 rounded shadow-md w-full max-w-sm space-y-4"
       >
         <h2 className="text-xl font-semibold text-center">Đăng nhập</h2>
 
@@ -71,7 +71,7 @@ const LoginPage: React.FC = () => {
         <p className="text-sm text-center">
           Chưa có tài khoản?{" "}
           <span
-            className="text-blue-600 hover:underline cursor-pointer"
+            className="text-blue-500 hover:underline cursor-pointer"
             onClick={() => navigate("/register")}
           >
             Đăng ký
