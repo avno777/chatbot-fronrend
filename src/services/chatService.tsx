@@ -1,40 +1,73 @@
 import axios from "axios";
-
-const API_URL = "https://your-backend.com/api/chat"; // Đổi URL thành backend thực tế
-
-export const getSessions = async () => {
-  const res = await axios.get(`${API_URL}/sessions`);
-  return res.data; // [{ id, name }]
-};
+import { getConfig } from "./configService";
+import type { Message } from "../types";
 
 export const getMessages = async (sessionId: string) => {
-  const res = await axios.get(`${API_URL}/sessions/${sessionId}/messages`);
-  return res.data; // [{ id, role, content }]
+  try {
+    const response = await axios.get<Message[]>(
+      `${getConfig().apiBaseUrl}/chat/${sessionId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sessions:", error);
+    throw error;
+  }
 };
 
-export const sendMessage = async (sessionId: string, content: string) => {
-  const res = await axios.post(`${API_URL}/sessions/${sessionId}/messages`, { content });
-  return res.data; // { id, role, content }
+export const saveMessages = async ({
+  userId,
+  agentId,
+  sessionId,
+  role,
+  message,
+}: {
+  userId: string;
+  agentId: string;
+  sessionId: string;
+  role: string;
+  message: string;
+}) => {
+  try {
+    const response = await axios.post<Message>(
+      `${getConfig().apiBaseUrl}/chat`,
+      { userId, agentId, sessionId, role, message }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating session:", error);
+    throw error;
+  }
 };
-
-export const createSession = async (name: string) => {
-  const res = await axios.post(`${API_URL}/sessions`, { name });
-  return res.data; // { id, name }
-};
-
-export const deleteSession = async (sessionId: string) => {
-  const res = await axios.delete(`${API_URL}/sessions/${sessionId}`);
-  return res.data;
-};
-
-export const sendFeedback = async (
-  messageId: string,
-  rating: number,
-  feedback: string
-) => {
-  const res = await axios.post(`/api/chat/messages/${messageId}/feedback`, {
-    rating,
-    feedback,
+export const sendMessage = async ({
+  user_id,
+  agent_id,
+  session_id,
+  role,
+  message,
+  timestamp,
+}: {
+  user_id: string;
+  agent_id: string;
+  session_id: string;
+  role: "user" | "bot";
+  message: string;
+  timestamp: string;
+}) => {
+  const res = await axios.post(`${getConfig().apiBaseUrl}/chat`, {
+    user_id,
+    agent_id,
+    session_id,
+    role,
+    message,
+    response: "", // server sẽ phản hồi lại
+    rate: 0,
+    feedback: "",
+    timestamp,
   });
-  return res.data;
+  return res.data; // { message: "response text" }
+};
+
+export const getMessageById = async (sessionId: string) => {
+  const res = await axios.get(`${getConfig().apiBaseUrl}/chat/${sessionId}`);
+  return res.data; // { id, role, content }
 };

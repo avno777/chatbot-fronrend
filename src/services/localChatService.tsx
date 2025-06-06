@@ -1,72 +1,46 @@
-import { v4 as uuid } from "uuid";
+import type { Message, Session } from "../types";
 
-export interface Message {
-  id: string;
-  role: "user" | "bot";
-  content: string;
-  timestamp: string;
-}
+const SESSION_KEY = "chat_sessions";
+const MESSAGE_PREFIX = "chat_messages_";
 
-const SESSION_KEY = "sessions";
-const MESSAGE_KEY = "messages";
-
-// 🟢 Lấy danh sách các phiên chat của 1 user
-export const getSessions = (userId: string) => {
-  const allSessions = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
-  return Object.values(allSessions[userId] || {});
+export const getSessions = (userId: string): Session[] => {
+  const raw = localStorage.getItem(SESSION_KEY);
+  if (!raw) return [];
+  return JSON.parse(raw).filter((s: Session) => s.userId === userId);
 };
 
-// 🟢 Tạo phiên chat mới
-export const createSession = (userId: string, name: string) => {
-  const id = uuid();
-  const allSessions = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
-  if (!allSessions[userId]) allSessions[userId] = {};
-  allSessions[userId][id] = { id, name };
-
-  localStorage.setItem(SESSION_KEY, JSON.stringify(allSessions));
-  return allSessions[userId][id];
-};
-
-// 🟢 Xóa 1 phiên chat
-export const deleteSession = (sessionId: string) => {
-  const allSessions = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
-  const allMessages = JSON.parse(localStorage.getItem(MESSAGE_KEY) || "{}");
-
-  for (const userId in allSessions) {
-    if (allSessions[userId][sessionId]) {
-      delete allSessions[userId][sessionId];
-    }
-  }
-
-  delete allMessages[sessionId];
-
-  localStorage.setItem(SESSION_KEY, JSON.stringify(allSessions));
-  localStorage.setItem(MESSAGE_KEY, JSON.stringify(allMessages));
-};
-
-// 🟢 Lấy tin nhắn của 1 phiên
-export const getMessages = (sessionId: string): Message[] => {
-  const allMessages = JSON.parse(localStorage.getItem(MESSAGE_KEY) || "{}");
-  return allMessages[sessionId] || [];
-};
-
-// 🟢 Thêm tin nhắn vào phiên
-export const addMessage = (
-  sessionId: string,
-  role: "user" | "bot",
-  content: string
-): Message => {
-  const allMessages = JSON.parse(localStorage.getItem(MESSAGE_KEY) || "{}");
-  if (!allMessages[sessionId]) allMessages[sessionId] = [];
-
-  const msg: Message = {
-    id: uuid(),
-    role,
-    content,
-    timestamp: new Date().toISOString(),
+export const createSession = (userId: string, name: string): Session => {
+  const sessions = getAllSessions();
+  const newSession: Session = {
+    id: Date.now().toString(),
+    userId,
+    name,
   };
+  const updated = [...sessions, newSession];
+  localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
+  return newSession;
+};
 
-  allMessages[sessionId].push(msg);
-  localStorage.setItem(MESSAGE_KEY, JSON.stringify(allMessages));
-  return msg;
+export const deleteSession = (sessionId: string) => {
+  const sessions = getAllSessions().filter((s) => s.id !== sessionId);
+  localStorage.setItem(SESSION_KEY, JSON.stringify(sessions));
+  localStorage.removeItem(`${MESSAGE_PREFIX}${sessionId}`);
+};
+
+export const getMessages = (sessionId: string): Message[] => {
+  const raw = localStorage.getItem(`${MESSAGE_PREFIX}${sessionId}`);
+  return raw ? JSON.parse(raw) : [];
+};
+
+export const saveMessages = (sessionId: string, messages: Message[]) => {
+  localStorage.setItem(
+    `${MESSAGE_PREFIX}${sessionId}`,
+    JSON.stringify(messages)
+  );
+};
+
+// internal helper
+const getAllSessions = (): Session[] => {
+  const raw = localStorage.getItem(SESSION_KEY);
+  return raw ? JSON.parse(raw) : [];
 };

@@ -5,3 +5,13 @@ export interface User {
   role: string;
   // Thêm các trường khác nếu có (vd: name, avatar, etc.)
 }
+
+export interface chatReq {
+  user_id: string;
+  agent_id: string;
+  message: string;
+  response: string;
+  rate: number;
+  feedback: string;
+  timestamp: string;
+}

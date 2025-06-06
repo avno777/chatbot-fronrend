@@ -2,14 +2,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { MessageCircle, User } from "lucide-react";
 import RatingFeedback from "./RatingFeedback";
+import type { Message } from "../types"; // Giả sử bạn có một type Message định nghĩa trong types/message.ts
 
 interface Props {
-  message: {
-    id: string;
-    role: "user" | "bot";
-    content: string;
-    timestamp: string;
-  };
+  message: Message;
 }
 
 const ChatMessage: React.FC<Props> = ({ message }) => {
@@ -38,7 +34,7 @@ const ChatMessage: React.FC<Props> = ({ message }) => {
 
       const word = words[index];
       if (word !== undefined) {
-        setDisplayedText((prev) =>
+        setDisplayedText((prev: string): string =>
           prev.length === 0 ? word : `${prev} ${word}`
         );
       }
@@ -72,7 +68,7 @@ const ChatMessage: React.FC<Props> = ({ message }) => {
           }`}
         >
           {isUser ? "Bạn" : "Bot"} •{" "}
-          {new Date(message.timestamp).toLocaleString("vi-VN")}
+          {new Date(message.createdAt ?? "").toLocaleString("vi-VN")}
         </div>
         <div className="flex items-start gap-2">
           {isUser ? (
@@ -88,7 +84,7 @@ const ChatMessage: React.FC<Props> = ({ message }) => {
             )}
           </p>
         </div>
-        {!isUser && !isTyping && <RatingFeedback messageId={message.id} />}
+        {!isUser && !isTyping && <RatingFeedback messageId={message.id ?? ""} />}
       </div>
     </div>
   );
